@@ -1,0 +1,5 @@
+*.xml
+*.osm
+*.png
+*.json
+test*
