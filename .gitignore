@@ -3,3 +3,7 @@
 *.png
 *.json
 test*
+main
+out*
+10*
+.vscode

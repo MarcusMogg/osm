@@ -2,20 +2,24 @@
 #encoding=utf-8
 
 import sys
-import math 
 import json
 import time
 import collections
+from math import radians, cos, sin, asin, sqrt,acos,pi,atan2
+
 R = 6371 * 1000  # 地球平均半径，6371km
 # 计算距离
-def distance(lon1, lat1, lon2, lat2):
-    lon1, lat1, lon2, lat2 = map(math.radians, [float(lon1), float(lat1), float(lon2), float(lat2)])  # 经纬度转换成弧度
+def real_distance(lon1, lat1, lon2, lat2):
+    lon1, lat1, lon2, lat2 = map(radians, [float(lon1), float(lat1), float(lon2), float(lat2)])  # 经纬度转换成弧度
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
-    dis = 2 * math.asin(math.sqrt(a)) * R 
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    dis = 2 * asin(sqrt(a)) * R 
     dis = round(dis, 3)
     return dis
+# 这里不需要真的算
+def distance(lon1, lat1, lon2, lat2):
+    return (lon1 - lon2)*(lon1 - lon2) +(lat1 - lat2) * (lat1 - lat2)
 
 tbegin = time.strptime("2016-10-1 00:00:00", r"%Y-%m-%d %H:%M:%S")
 tsbegin = time.mktime(tbegin)
@@ -45,6 +49,9 @@ def nearestID(lng,lat):
     maxID = ""
     ix = low_bound(xlabels,lng)
     for i in range(ix,len(xlabels)):
+        dis = distance(xlabels[i],lat,lng,lat)
+        if dis >= maxDis:
+            break
         iy = low_bound(xydata[i],(lat,""))
         for j in range(iy,len(xydata[i])):
             dis = distance(xlabels[i],xydata[i][j][0],lng,lat)
@@ -61,6 +68,9 @@ def nearestID(lng,lat):
             else:
                 break
     for i in range(ix-1,0,-1):
+        dis = distance(xlabels[i],lat,lng,lat)
+        if dis >= maxDis:
+            break
         iy = low_bound(xydata[i],(lat,""))
         for j in range(iy,len(xydata[i])):
             dis = distance(xlabels[i],xydata[i][j][0],lng,lat)
@@ -119,12 +129,13 @@ if __name__=="__main__":
             angle = float(angle)
         except :
             continue
+        fact = congestionFactor(speed)
+        # 速度高的数据可以忽略
+        if fact <= 0:
+            continue
         id = nearestID(lng,lat)
         if id != "":
-            flag = abs(angle - nodes[id][2]) > 90
-            angle = nodes[id][2]
-            if flag :
-                angle = 360-angle
+            if real_distance(lng,lat,nodes[id][0],nodes[id][1]) > 50:
+                continue
             tseg = timeSeg(ts)
-            fact = congestionFactor(speed)
             print("%s\t%f\t%d\t%d"%(id,angle,tseg,fact))

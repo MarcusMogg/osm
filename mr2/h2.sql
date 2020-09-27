@@ -3,7 +3,8 @@ create table if not exists didi.node_facts(
     id string,
     angle double,
     ts int,
-    fact int
+    fact int,
+    cnt int
 );
 
 add file /home/bigdata/mr2/reduce2.py;
@@ -30,4 +31,4 @@ FROM (
 INSERT OVERWRITE TABLE node_facts
     REDUCE mout.id,mout.angle,mout.tsg,mout.fact
     USING "python3 reduce2.py"
-    AS id,angle,tsg,fact;
+    AS id,angle,tsg,fact,cnt;
