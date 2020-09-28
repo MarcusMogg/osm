@@ -82,7 +82,7 @@ func LoadWays(f string) {
 			ind, _ := strconv.Atoi(nd)
 			wayr[i][nd] = r
 			if ind < maxID {
-				wayr[i][nd] = nd
+				r = nd
 			}
 		}
 	}
@@ -105,15 +105,10 @@ func LoadWayAngle(f string) {
 func LoadNodes(f string) {
 	parseJSON(f, &nodes)
 	nodewayid = make(map[string][]widang)
-	cnt := 0
 	for i := range ways {
 		for j, nd := range ways[i] {
-			if j == 0 || j == len(ways[i]) {
+			if j == 0 || j == len(ways[i])-1 {
 				continue
-			}
-			if _, ok := nodewayid[nd]; ok {
-				// fmt.Println("在两条路上:" + nd)
-				cnt++
 			}
 			nodewayid[nd] = append(nodewayid[nd], widang{
 				id:    i,
@@ -121,7 +116,6 @@ func LoadNodes(f string) {
 			})
 		}
 	}
-	fmt.Println(cnt)
 }
 
 // LoadTsd 加载堵塞数据
@@ -151,15 +145,19 @@ func LoadTsd(f string) {
 			k := SegKey{}
 			w := ""
 			minangle := 800.0
+			flag := true
 			for _, xy := range ws {
 				aangel := 180 + xy.angle
 				if aangel >= 360 {
 					aangel -= 360
 				}
-				mint := min(min(math.Abs(xy.angle-ange), 360-math.Abs(xy.angle-ange)),
-					min(math.Abs(aangel-ange), 360-math.Abs(aangel-ange)))
+				zhengx := min(math.Abs(xy.angle-ange), 360-math.Abs(xy.angle-ange))
+				fux := min(math.Abs(aangel-ange), 360-math.Abs(aangel-ange))
+				mint := min(zhengx, fux)
 				if mint < minangle {
 					w = xy.id
+					minangle = mint
+					flag = zhengx < fux
 				}
 			}
 			if w == "" {
@@ -167,21 +165,38 @@ func LoadTsd(f string) {
 				continue
 			}
 			ind, _ := strconv.Atoi(ss[0])
-			if ange == nodes[ss[0]][2] {
+			if flag {
 				if ind < maxID {
 					k.From = ss[0]
 				} else {
-					k.From = wayl[w][ss[0]]
+					k.From, ok = wayl[w][ss[0]]
+					if !ok {
+						fmt.Println("err id:" + ss[0])
+						continue
+					}
 				}
-				k.To = wayr[w][ss[0]]
+				k.To, ok = wayr[w][ss[0]]
+				if !ok {
+					fmt.Println("err id:" + ss[0])
+					continue
+				}
 			} else {
-				k.To = wayl[w][ss[0]]
+				k.To, ok = wayl[w][ss[0]]
+				if !ok {
+					fmt.Println("err id:" + ss[0])
+					continue
+				}
 				if ind < maxID {
 					k.From = ss[0]
 				} else {
-					k.From = wayr[w][ss[0]]
+					k.From, ok = wayr[w][ss[0]]
+					if !ok {
+						fmt.Println("err id:" + ss[0])
+						continue
+					}
 				}
 			}
+
 			if _, ok := Tsd[ts]; !ok {
 				Tsd[ts] = make(map[SegKey]*SegV)
 			}

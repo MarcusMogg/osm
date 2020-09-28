@@ -1,6 +1,6 @@
 ## 地图数据筛选
 
-原始地图数据来源 https://overpass-api.de/api/map?bbox=108.92,34.20,109.01,34.28
+原始地图数据来源 https://overpass-api.de/api/map?bbox=108.914,34.205,109.005,34.285
 
 way.py 筛选地图数据，只保留[highway](https://wiki.openstreetmap.org/wiki/highway)
 

@@ -88,9 +88,9 @@ plt.savefig('stsd.png',dpi = 300)
 
 
 
-with open("nodes2.json","w+") as f:
+with open("nodes.json","w+") as f:
     json.dump(nodeRes,f)
-with open("ways2.json","w+") as f:
+with open("ways.json","w+") as f:
     json.dump(wayRes,f)
 with open("waytype.json","w+") as f:
     json.dump(highway,f)
